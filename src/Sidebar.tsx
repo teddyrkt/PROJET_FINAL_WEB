@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { User, Project } from '../types';
+import ConfirmModal from "./ConfirmModal"
 
 interface SidebarProps {
   users: User[];
@@ -50,6 +51,7 @@ export default function Sidebar({
   onSelectUser, onSelectProject, onAddProject, onDeleteProject
 }: SidebarProps) {
   const userProjects = projects.filter(p => p.userId === currentUser.id);
+  const [confirmDeleteProject, setConfirmDeleteProject] = useState<number | null>(null)
 
   return (
     <aside className="sidebar">
@@ -91,7 +93,9 @@ export default function Sidebar({
               <span className="project-name">{project.name}</span>
               <button
                 className="btn-icon project-delete"
-                onClick={e => { e.stopPropagation(); onDeleteProject(project.id); }}
+                onClick={(e) => {e.stopPropagation();
+                setConfirmDeleteProject(project.id);
+              }}
                 title="Supprimer"
               >✕</button>
             </div>
@@ -99,6 +103,16 @@ export default function Sidebar({
         </div>
         <AddProjectForm onAdd={onAddProject} />
       </div>
+      {confirmDeleteProject !== null && (
+        <ConfirmModal
+          message="Supprimer ce projet ?"
+          onCancel={() => setConfirmDeleteProject(null)}
+          onConfirm={() => {
+            onDeleteProject(confirmDeleteProject)
+            setConfirmDeleteProject(null)
+          }}
+        />
+)}
     </aside>
   );
 }

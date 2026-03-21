@@ -15,6 +15,7 @@ export interface Project {
   id: number;
   userId: number;
   name: string;
+  background?: string;
   columns: Column[];
 }
 

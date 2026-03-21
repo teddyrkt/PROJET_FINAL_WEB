@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Column, Ticket } from '../types';
 import TicketCard from './TicketCard';
+import ConfirmModal from "./ConfirmModal"
 
 interface ColumnProps {
   column: Column;
   onDragStart: (e: React.DragEvent, ticketId: string, fromColumnId: string) => void;
-  onDrop: (e: React.DragEvent, toColumnId: string) => void;
+  onDrop: (e: React.DragEvent, toColumnId: string, index: number) => void;
   onDeleteTicket: (ticketId: string, columnId: string) => void;
   onUpdateTicket: (ticketId: string, columnId: string, updated: Partial<Ticket>) => void;
   onAddTicket: (columnId: string, ticket: Omit<Ticket, 'id'>) => void;
@@ -20,18 +21,20 @@ export default function ColumnComponent({
   const [newTitle, setNewTitle] = useState('');
   const [newDesc, setNewDesc] = useState('');
   const [newPriority, setNewPriority] = useState<Ticket['priority']>('medium');
+  const [dropIndex, setDropIndex] = useState<number | null>(null);
+  const [confirmDeleteColumn, setConfirmDeleteColumn] = useState(false)
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(true);
   };
 
-  const handleDragLeave = () => setIsDragOver(false);
-
-  const handleDrop = (e: React.DragEvent) => {
+const handleDragLeave = (e: React.DragEvent) => {
+  if (!e.currentTarget.contains(e.relatedTarget as Node)) {
     setIsDragOver(false);
-    onDrop(e, column.id);
-  };
+    setDropIndex(null);
+  }
+};
 
   const handleAdd = () => {
     if (!newTitle.trim()) return;
@@ -47,27 +50,69 @@ export default function ColumnComponent({
       className={`column ${isDragOver ? 'drag-over' : ''}`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
     >
       <div className="column-header">
         <div className="column-title-row">
           <span className="column-count">{column.tickets.length}</span>
           <h3 className="column-title">{column.title}</h3>
         </div>
-        <button className="btn-icon delete-col" onClick={() => onDeleteColumn(column.id)} title="Supprimer colonne">✕</button>
+        <button
+          className="btn-icon delete-col"
+          onClick={() => setConfirmDeleteColumn(true)}
+          title="Supprimer colonne"
+        >✕
+        </button>
       </div>
 
       <div className="tickets-list">
-        {column.tickets.map(ticket => (
-          <TicketCard
-            key={ticket.id}
-            ticket={ticket}
-            columnId={column.id}
-            onDragStart={onDragStart}
-            onDelete={onDeleteTicket}
-            onUpdate={onUpdateTicket}
-          />
+
+        {column.tickets.map((ticket, index) => (
+          <React.Fragment key={ticket.id}>
+
+            {/* zone drop AVANT ticket */}
+            <div
+              className="drop-zone"
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+                setDropIndex(index);
+              }}
+              onDrop={(e) => {
+                onDrop(e, column.id, index);
+                setDropIndex(null);
+              }}
+            >
+              {dropIndex === index && <div className="drop-indicator"></div>}
+            </div>
+
+            <TicketCard
+              ticket={ticket}
+              columnId={column.id}
+              onDragStart={onDragStart}
+              onDelete={onDeleteTicket}
+              onUpdate={onUpdateTicket}
+            />
+
+          </React.Fragment>
         ))}
+
+        {/* zone drop FIN */}
+        <div
+          className="drop-zone"
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDropIndex(column.tickets.length);
+          }}
+          onDrop={(e) => {
+            onDrop(e, column.id, column.tickets.length);
+            setDropIndex(null);
+          }}
+        >
+          {dropIndex === column.tickets.length && (
+            <div className="drop-indicator"></div>
+          )}
+        </div>
+
       </div>
 
       {addingTicket ? (
@@ -104,6 +149,18 @@ export default function ColumnComponent({
           + Ajouter un ticket
         </button>
       )}
+
+            {/* confirmation suppression colonne */}
+      {confirmDeleteColumn && (
+        <ConfirmModal
+          message="Supprimer cette colonne ?"
+          onCancel={() => setConfirmDeleteColumn(false)}
+          onConfirm={() => {
+            onDeleteColumn(column.id)
+            setConfirmDeleteColumn(false)
+          }}
+        />
+    )}
     </div>
   );
 }
