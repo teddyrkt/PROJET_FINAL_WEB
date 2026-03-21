@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Ticket } from '../types';
+import ConfirmModal from "./ConfirmModal"
 
 interface TicketCardProps {
   ticket: Ticket;
@@ -21,6 +22,7 @@ export default function TicketCard({ ticket, columnId, onDragStart, onDelete, on
   const [description, setDescription] = useState(ticket.description);
   const [priority, setPriority] = useState(ticket.priority);
   const p = priorityConfig[ticket.priority];
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   const handleSave = () => {
     onUpdate(ticket.id, columnId, { title, description, priority });
@@ -63,7 +65,13 @@ export default function TicketCard({ ticket, columnId, onDragStart, onDelete, on
     <div
       className="ticket-card"
       draggable
-      onDragStart={e => onDragStart(e, ticket.id, columnId)}
+      onDragStart={e => {
+        document.body.classList.add('dragging');
+        onDragStart(e, ticket.id, columnId);
+      }}
+      onDragEnd={() => {
+        document.body.classList.remove('dragging');
+      }}
     >
       <div className="ticket-priority-badge" style={{ color: p.color, background: p.bg }}>
         ● {p.label}
@@ -72,8 +80,23 @@ export default function TicketCard({ ticket, columnId, onDragStart, onDelete, on
       {ticket.description && <p className="ticket-desc">{ticket.description}</p>}
       <div className="ticket-actions">
         <button className="btn-icon edit" onClick={() => setEditing(true)} title="Modifier">✎</button>
-        <button className="btn-icon delete" onClick={() => onDelete(ticket.id, columnId)} title="Supprimer">🗑</button>
+        <button
+          className="btn-icon delete"
+          onClick={() => setConfirmDelete(true)}
+        >
+          🗑
+        </button>
       </div>
-    </div>
+        {confirmDelete && (
+          <ConfirmModal
+            message="Supprimer ce ticket ?"
+            onCancel={() => setConfirmDelete(false)}
+            onConfirm={() => {
+              onDelete(ticket.id, columnId)
+              setConfirmDelete(false)
+            }}
+          />
+        )}
+      </div>
   );
 }

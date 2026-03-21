@@ -59,11 +59,28 @@ body::after {
   100% { filter: hue-rotate(20deg) brightness(1.08); }
 }
 
+.app-layout.bg1{
+  background:linear-gradient(135deg,#6C63FF,#FF6584);
+}
+
+.app-layout.bg2{
+  background:linear-gradient(135deg,#00c6ff,#0072ff);
+}
+
+.app-layout.bg3{
+  background:linear-gradient(135deg,#ff9966,#ff5e62);
+}
+
+.app-layout.bg4{
+  background:linear-gradient(135deg,#56ab2f,#a8e063);
+}
+
 /* ─── LAYOUT ─────────────────────────────────────────────── */
 .app-layout {
   display: flex;
   height: 100vh;
   overflow: hidden;
+  background-color:#0d0f14;
 }
 
 /* ─── SIDEBAR ────────────────────────────────────────────── */
@@ -213,9 +230,9 @@ body::after {
   flex-shrink: 0;
 }
 .board-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 22px;
-  font-weight: 800;
+  /*font-family: 'Syne', sans-serif;*/
+  font-size: 30px;
+  font-weight: bold;
   letter-spacing: -0.5px;
 }
 .board-subtitle {
@@ -232,6 +249,108 @@ body::after {
   color: #fff;
   letter-spacing: 0.3px;
 }
+
+/* ─── MENU BACKGROUND ───────────────────────────────── */
+.menu-button{
+  background:none;
+  border:none;
+  font-size:22px;
+  color:var(--text-muted);
+  cursor:pointer;
+  margin-left:10px;
+}
+
+
+
+.board-header-right{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+/* Overlay */
+
+.board-menu-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.35);
+  display:flex;
+  justify-content:flex-end;
+  z-index:100;
+}
+
+/* Menu */
+
+.board-menu{
+  width:280px;
+  background:#1a1d27;
+  height:100%;
+  padding:16px;
+  border-left:1px solid var(--border);
+}
+
+.menu-header button{
+  padding-left: 2px;
+  padding-right: 2px;
+  font-weight: bold;
+}
+
+/* Header */
+
+.menu-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+ 
+/* Background grid */
+
+.background-grid{
+  margin-top : 10px;
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+
+.bg-option{
+  height:70px;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+/* backgrounds */
+
+.bg1{background:linear-gradient(135deg,#6C63FF,#FF6584);}
+.bg2{background:linear-gradient(135deg,#00c6ff,#0072ff);}
+.bg3{background:linear-gradient(135deg,#ff9966,#ff5e62);}
+.bg4{background:linear-gradient(135deg,#56ab2f,#a8e063);}
+
+/* Upload Image */
+.upload-background{
+  margin-top:20px;
+  height:70px;
+  border-radius:12px;
+  border:2px dashed rgba(255,255,255,0.2);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  color:var(--text-muted);
+  font-size:13px;
+  transition:all 0.2s;
+}
+
+.upload-background:hover{
+  border-color:var(--accent);
+  color:var(--accent);
+  background:rgba(108,99,255,0.05);
+}
+
+.upload-background input{
+  display:none;
+}
+
 
 /* ─── BOARD ──────────────────────────────────────────────── */
 .board {
@@ -297,7 +416,7 @@ body::after {
   padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 .tickets-list::-webkit-scrollbar { width: 4px; }
 .tickets-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
@@ -311,6 +430,7 @@ body::after {
   cursor: grab;
   transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
   position: relative;
+  flex-shrink: 0;
 }
 .ticket-card:hover {
   background: rgba(255,255,255,0.07);
@@ -352,6 +472,30 @@ body::after {
 }
 .ticket-card:hover .ticket-actions { opacity: 1; }
 
+.drop-zone{
+  height:8px;
+  flex-shrink: 0;
+  margin: 4px 0;
+  position: relative;
+  z-index: 5;
+}
+
+.drop-indicator{
+  height:6px;
+  background:#6C63FF;
+  border-radius:4px;
+  margin-top:4px;
+  margin-bottom:4px;
+  animation: dropFlash .15s ease;
+  z-index: 10;
+  position: relative;
+}
+
+@keyframes dropFlash{
+  from{opacity:0}
+  to{opacity:1}
+}
+
 /* ─── BOUTONS ICON ───────────────────────────────────────── */
 .btn-icon {
   background: none;
@@ -389,6 +533,7 @@ body::after {
 .ticket-edit-textarea { resize: none; height: 64px; }
 .ticket-edit-select option { background: #1a1d27; }
 
+
 .ticket-edit-actions { display: flex; gap: 6px; margin-top: 4px; }
 .btn-save {
   flex: 1;
@@ -420,7 +565,9 @@ body::after {
 /* ─── ADD TICKET / COLUMN ────────────────────────────────── */
 .add-ticket-form { padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
 .btn-add-ticket {
-  margin: 4px 10px 10px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  margin-left: 10px;
   padding: 8px;
   background: none;
   border: 1px dashed rgba(255,255,255,0.1);
@@ -493,4 +640,46 @@ body::after {
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
+
+/* ─── CONFIRM DELETE ─────────────────────────────────────── */
+.confirm-delete{
+  position:absolute;
+  inset:0;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+
+  background:rgba(0,0,0,0.75); /* plus sombre */
+
+  border-radius:10px;
+  z-index:10;
+}
+
+/* texte */
+
+.confirm-delete p{
+  margin-bottom:12px;
+  font-weight:500;
+  text-align:center;
+}
+
+/* boutons */
+
+.confirm-actions{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+}
+
+/* style boutons */
+
+.confirm-actions button{
+  padding:6px 12px;
+  border-radius:6px;
+  border:none;
+  cursor:pointer;
+}
+
 @keyframes spin { to { transform: rotate(360deg); } }

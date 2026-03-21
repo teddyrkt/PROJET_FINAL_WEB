@@ -16,18 +16,36 @@ export default function Board({ project, onUpdate }: BoardProps) {
     setDragging({ ticketId, fromColumnId });
   };
 
-  const handleDrop = (_e: React.DragEvent, toColumnId: string) => {
-    if (!dragging || dragging.fromColumnId === toColumnId) return;
+  const handleDrop = (_e: React.DragEvent, toColumnId: string, index: number) => {
 
-    const updated = { ...project, columns: project.columns.map(col => ({ ...col, tickets: [...col.tickets] })) };
+    if (!dragging) return;
+
+    const updated = {
+      ...project,
+      columns: project.columns.map(col => ({
+        ...col,
+        tickets: [...col.tickets]
+      }))
+    };
+
     const fromCol = updated.columns.find(c => c.id === dragging.fromColumnId);
     const toCol = updated.columns.find(c => c.id === toColumnId);
+
     if (!fromCol || !toCol) return;
 
-    const ticketIdx = fromCol.tickets.findIndex(t => t.id === dragging.ticketId);
-    if (ticketIdx === -1) return;
-    const [ticket] = fromCol.tickets.splice(ticketIdx, 1);
-    toCol.tickets.push(ticket);
+    const fromIndex = fromCol.tickets.findIndex(
+      t => t.id === dragging.ticketId
+    );
+
+    const [ticket] = fromCol.tickets.splice(fromIndex, 1);
+
+    let insertIndex = index;
+
+    if (fromCol.id === toCol.id && fromIndex < index) {
+      insertIndex--;
+    }
+
+    toCol.tickets.splice(insertIndex, 0, ticket);
 
     onUpdate(updated);
     setDragging(null);
