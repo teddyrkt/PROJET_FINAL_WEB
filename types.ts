@@ -3,6 +3,7 @@ export interface Ticket {
   title: string;
   description: string;
   priority: 'low' | 'medium' | 'high';
+  link?: string;
 }
 
 export interface Column {
@@ -13,7 +14,8 @@ export interface Column {
 
 export interface Project {
   id: number;
-  userId: number;
+  ownerId: number;
+  userIds: number[];
   name: string;
   background?: string;
   columns: Column[];
