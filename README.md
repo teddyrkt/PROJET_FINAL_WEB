@@ -118,7 +118,7 @@ PROJET_FINAL_WEB/
       "userIds": [
         1774370369556
       ],
-      "name": "PITIE",
+      "name": "Projet perso",
       "background": "bg1",
       "columns": [
         {
