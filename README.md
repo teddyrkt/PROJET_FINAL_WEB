@@ -50,18 +50,18 @@ Elle permet de créer des projets, gérer des tickets et collaborer entre plusie
 ## Lancer le projet
 
 ### Frontend
-Ouvrir un premier terminal a la racine du projet
-npm install
-npm run dev
+- Ouvrir un premier terminal a la racine du projet
+- npm install
+- npm run dev
 
 ### Backend
-Ouvrir un second terminal
-cd backend -> on va dans le dossier backend
-npx ts-node server.ts
-  ce qui retournera -> API running on http://localhost:3000
+- Ouvrir un second terminal
+- cd backend -> on va dans le dossier backend
+- npx ts-node server.ts
+  -> ce qui retournera API running on http://localhost:3000
 
-Puis cliquer sur le lien dans le premier terminal:
-http://localhost:5173
+- Puis cliquer sur le lien dans le premier terminal:
+->http://localhost:5173
 
 ---
 
