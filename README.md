@@ -1,9 +1,30 @@
 # DriftWork — Gestionnaire de projets (type Trello)
+Membres : Teddy Rakotoarivelo & Ouissal Jarrari
 
 ## Description
 
 DriftWork est une application de gestion de projets inspirée de Trello.
 Elle permet de créer des projets, gérer des tickets et collaborer entre plusieurs utilisateurs.
+
+---
+
+## Fonctionnalités implémentées
+
+### Obligatoires
+- **Colonnes** : Affichage, ajout, suppression de colonnes
+- **Cartes/Tickets** : Création, édition, suppression de tickets
+- **Drag & Drop** : Glisser-déposer des tickets entre les colonnes
+
+### Backend simulé
+- `public/projects.json` : fichier JSON qui simule la base de données
+- Chargé au démarrage via `fetch()`
+- Structure : `{ users, projects }` avec colonnes et tickets imbriqués
+
+### Bonus 
+- **Multi-utilisateurs** : Possibilité de créer des utilisateurs
+- **Fond d'écran modifiable** : Couleurs proposées + possibilité d'importer image de fond
+- **Possibilité de créer des projets communs** : Gestion des accès à un projet
+- **Plusieurs champs dans un ticket** : Titre, Description (optionnel), Lien (optionnel), Priorité
 
 ---
 
@@ -69,26 +90,6 @@ PROJET_FINAL_WEB/
 ├── vite.config.ts
 └── types.ts
 ```
-
----
-
-## Fonctionnalités implémentées
-
-### Obligatoires
-- **Colonnes** : Affichage, ajout, suppression de colonnes
-- **Cartes/Tickets** : Création, édition, suppression de tickets
-- **Drag & Drop** : Glisser-déposer des tickets entre les colonnes
-
-### Backend simulé
-- `public/projects.json` : fichier JSON qui simule la base de données
-- Chargé au démarrage via `fetch()`
-- Structure : `{ users, projects }` avec colonnes et tickets imbriqués
-
-### Bonus 
-- **Multi-utilisateurs** : Possibilité de créer des utilisateurs
-- **Fond d'écran modifiable** : Couleurs proposées + possibilité d'importer image de fond
-- **Possibilité de créer des projets communs** : Gestion des accès à un projet
-- **Plusieurs champs dans un ticket** : Titre, Description (optionnel), Lien (optionnel), Priorité
 
 ---
 
