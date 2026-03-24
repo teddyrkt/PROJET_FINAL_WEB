@@ -22,6 +22,7 @@
 }
 
 /* ─── RESET ─────────────────────────────────────────────── */
+/*supprime les marges/paddings par défaut*/
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: 'DM Sans', sans-serif;
@@ -35,7 +36,7 @@ body::before {
   content: '';
   position: fixed;
   inset: 0;
-  z-index: -2;
+  z-index: -2;/* place l’élément derrière le contenu principal */
   background:
     radial-gradient(ellipse 80% 60% at 20% 10%, rgba(108,99,255,0.25) 0%, transparent 60%),
     radial-gradient(ellipse 60% 50% at 80% 80%, rgba(255,101,132,0.20) 0%, transparent 60%),
@@ -49,14 +50,15 @@ body::after {
   content: '';
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: -1;/* au-dessus du fond mais derrière contenu */
   background-image: radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
+/* Animation du fond */
 @keyframes bgShift {
-  0%   { filter: hue-rotate(0deg) brightness(1); }
-  100% { filter: hue-rotate(20deg) brightness(1.08); }
+  0%   { filter: hue-rotate(0deg) brightness(1); }/* état initial */
+  100% { filter: hue-rotate(20deg) brightness(1.08); } /* variation couleur/luminosité */
 }
 
 .app-layout.bg1{
@@ -75,6 +77,7 @@ body::after {
   background:linear-gradient(135deg,#56ab2f,#a8e063);
 }
 
+
 /* ─── LAYOUT ─────────────────────────────────────────────── */
 .app-layout {
   display: flex;
@@ -83,18 +86,94 @@ body::after {
   background-color:#0d0f14;
 }
 
-/* ─── SIDEBAR ────────────────────────────────────────────── */
+/* ─── SIDEBAR WRAPPER ────────────────────────────────────── */
+.sidebar-wrapper {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);/* animation fluide lors des changements de largeur */
+  overflow: hidden;
+}
+
+/* ─── SIDEBAR ──────────────────────────────────────────────────────────────── */
 .sidebar {
-  width: 260px;
-  min-width: 260px;
+  width: 100%;
+  min-width: 180px;
   background: var(--bg-sidebar);
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);/* effet glass */
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   padding: 24px 16px;
   gap: 28px;
-  overflow-y: auto;
+  overflow-y: auto;/* scroll vertical */
+  overflow-x: hidden;/* pas de scroll horizontal */
+  transition: opacity 0.2s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/*fermer la sidebar*/
+.sidebar-wrapper.collapsed .sidebar {
+  opacity: 0;/*sidebar invisible*/
+  pointer-events: none;/*on enleve toute interaction*/
+  transform: translateX(-20px);/* décale légèrement la sidebar vers la gauche*/
+}
+
+/* ─── SIDEBAR DECALAGE ──────────────────────────────────────── */
+.sidebar-resize-handle {
+  position: absolute;
+  right: -4px;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  cursor: col-resize;
+  z-index: 100;
+}
+
+.sidebar-resize-handle::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 40px;
+  border-radius: 2px;
+  background: var(--border);
+  transition: background 0.2s, width 0.2s;
+}
+
+.sidebar-resize-handle:hover::after {
+  background: var(--accent);
+  width: 3px;
+}
+
+/* ─── BOUTTON SIDEBAR ──────────────────────────────────────── */
+.sidebar-toggle-btn {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 200;
+  width: 20px;
+  height: 48px;
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border);
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 14px;
+  transition: background 0.2s, color 0.2s, left 0.3s cubic-bezier(0.4, 0, 0.2, 1);/*animation changement de style*/
+  backdrop-filter: blur(10px);/*floutage*/
+  padding: 0;
+}
+
+.sidebar-toggle-btn:hover {
+  background: rgba(108, 99, 255, 0.15);
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
 .sidebar-logo {
@@ -103,18 +182,22 @@ body::after {
   gap: 10px;
   padding: 4px 8px;
 }
+
+/*logo app*/
 .logo-icon {
   font-size: 26px;
   color: var(--accent);
   filter: drop-shadow(0 0 8px var(--accent));
 }
+
+/*Nom app*/
 .logo-text {
-  font-family: 'Syne', sans-serif;
-  font-size: 20px;
+  font-size: 30px;
   font-weight: 800;
   letter-spacing: -0.5px;
+  font-weight: bold;
   background: linear-gradient(135deg, #fff 30%, var(--accent));
-  -webkit-background-clip: text;
+  -webkit-background-clip: text;/*degradé*/
   -webkit-text-fill-color: transparent;
 }
 
@@ -122,7 +205,7 @@ body::after {
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 2px;
-  text-transform: uppercase;
+  text-transform: uppercase;/*Maj*/
   color: var(--text-muted);
   margin-bottom: 10px;
   padding: 0 4px;
@@ -131,7 +214,8 @@ body::after {
 .sidebar-section { display: flex; flex-direction: column; }
 .sidebar-projects { flex: 1; }
 
-/* Users */
+
+/* UTILISATEURS */
 .user-list { display: flex; flex-direction: column; gap: 6px; }
 .user-btn {
   display: flex;
@@ -190,8 +274,10 @@ body::after {
 .project-delete { opacity: 0; transition: opacity 0.2s; }
 .project-item:hover .project-delete { opacity: 1; }
 
+.no-users { color: var(--text-muted); font-size: 12px; font-style: italic; padding: 4px 12px; }
 .no-projects { color: var(--text-muted); font-size: 12px; font-style: italic; padding: 4px 12px; }
 
+/*bouton ajouter projet*/
 .btn-add-project {
   display: flex; align-items: center; gap: 6px;
   padding: 8px 12px;
@@ -208,6 +294,11 @@ body::after {
 .btn-add-project:hover { background: rgba(108,99,255,0.1); }
 
 .add-project-form { display: flex; flex-direction: column; gap: 6px; }
+
+
+.add-user-btn {
+  margin-top: 10px;
+}
 
 /* ─── MAIN CONTENT ────────────────────────────────────────── */
 .main-content {
@@ -329,6 +420,7 @@ body::after {
 /* Upload Image */
 .upload-background{
   margin-top:20px;
+  margin-bottom: 20px;
   height:70px;
   border-radius:12px;
   border:2px dashed rgba(255,255,255,0.2);
@@ -349,6 +441,52 @@ body::after {
 
 .upload-background input{
   display:none;
+}
+
+/* --- Gestion des accès --- */
+
+.user-checkbox-list {
+  margin-top: 10px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+}
+
+.user-checkbox-list label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 4px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.user-checkbox-list label:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.user-checkbox-list input[type="checkbox"] {
+  accent-color: #6C63FF; /* couleur principale */
+  cursor: pointer;
+}
+
+/* bouton sauvegarder */
+
+.board-menu .btn-save {
+  width: 100%;
+  margin-top: 12px;
+  padding: 8px;
+  border-radius: 8px;
+  background: #6C63FF;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.board-menu .btn-save:hover {
+  opacity: 0.8;
 }
 
 
@@ -463,6 +601,19 @@ body::after {
   line-height: 1.5;
   margin-bottom: 6px;
 }
+
+.ticket-link {
+  display: inline-block;
+  margin-top: 5px;
+  color: #6C63FF;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.ticket-link:hover {
+  text-decoration: underline;
+}
+
 .ticket-actions {
   display: flex;
   gap: 4px;

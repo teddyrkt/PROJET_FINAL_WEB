@@ -1,38 +1,90 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AppData, Project, User } from '../types';
 import './App.css';
-import Board from './Board';
-import Sidebar from './Sidebar';
-import BoardMenu from './BoardMenu'
+import Board from './Components/Board';
+import Sidebar from './Components/Sidebar';
+import BoardMenu from './Components/BoardMenu'
 
 export default function App() {
-  const [data, setData] = useState<AppData | null>(null);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [currentProject, setCurrentProject] = useState<Project | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [data, setData] = useState<AppData | null>(null);// Données globales (users + projects)
+  const [currentUser, setCurrentUser] = useState<User | null>(null);// Utilisateur sélectionné
+  const [currentProject, setCurrentProject] = useState<Project | null>(null);// Projet sélectionné
+  const [loading, setLoading] = useState(true);// État de chargement
+  const [menuOpen, setMenuOpen] = useState(false);// Menu ouvert/fermé
+
+  // ── Sidebar resize / collapse ──
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(260);
+
+  const isResizing = useRef(false);// savoir si on redimensionne
+  const startX = useRef(0);// position souris départ
+  const startWidth = useRef(0);// largeur départ
+
+  // Gestion du resize de la sidebar
+  const handleResizeStart = (e: React.MouseEvent) => {
+    if (sidebarCollapsed) return;
+    isResizing.current = true;
+    startX.current = e.clientX;
+    startWidth.current = sidebarWidth;
+
+    // style curseur
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    const onMove = (ev: MouseEvent) => {
+      if (!isResizing.current) return;
+
+      // calcule nouvelle largeur
+      setSidebarWidth(Math.min(400, Math.max(180, startWidth.current + ev.clientX - startX.current)));
+    };
+
+    const onUp = () => {
+      isResizing.current = false;
+
+      // reset style
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  };
+
+  /// CHARGEMENT DONNÉES ///
 
   useEffect(() => {
+    // Appel API backend
     fetch("http://localhost:3000/data")
       .then(r => r.json())
       .then((d: AppData) => {
         setData(d);
+
+        // premier utilisateur
         setCurrentUser(d.users[0]);
-        const firstProject = d.projects.find(p => p.userId === d.users[0].id) || null;
+
+        // premier projet accessible
+        const firstProject = d.projects.find(p => p.userIds?.includes(d.users[0].id)) || null;
         setCurrentProject(firstProject);
         setLoading(false);
       });
   }, []);
 
+
+  // CHANGER UTILISATEUR //
   const handleSelectUser = (user: User) => {
     setCurrentUser(user);
-    const firstProject = data?.projects.find(p => p.userId === user.id) || null;
+
+     // change projet automatiquement
+    const firstProject = data?.projects.find(p => p.userIds?.includes(user.id)) || null;
     setCurrentProject(firstProject);
   };
 
+
+  // MODIFIER PROJET //
   const handleUpdateProject = (updated: Project) => {
     if (!data) return;
 
+    // met à jour localement
     const newProjects = data.projects.map(p =>
       p.id === updated.id ? updated : p
     );
@@ -40,6 +92,7 @@ export default function App() {
     setData({ ...data, projects: newProjects });
     setCurrentProject(updated);
 
+    // envoie au backend
     fetch(`http://localhost:3000/projects/${updated.id}`, {
       method: "PUT",
       headers: {
@@ -49,32 +102,51 @@ export default function App() {
     });
   };
 
-  const handleAddProject = (name: string) => {
+  // AJOUTER PROJET //
+  const handleAddProject = (name: string, userIds: number[]) => {
     if (!data || !currentUser) return;
+
+    // garantit que le créateur est dedans
+    const finalUserIds = userIds.includes(currentUser.id)
+      ? userIds
+      : [...userIds, currentUser.id];
+
     const newProject: Project = {
       id: Date.now(),
-      userId: currentUser.id,
+      ownerId: currentUser.id, // créateur
+      userIds: finalUserIds,   // accès
       name,
       background: "bg1",
+
+      // colonnes par défaut créer 
       columns: [
         { id: `col-${Date.now()}-1`, title: 'À faire', tickets: [] },
         { id: `col-${Date.now()}-2`, title: 'En cours', tickets: [] },
         { id: `col-${Date.now()}-3`, title: 'Terminé', tickets: [] },
       ],
     };
-    const newData = { ...data, projects: [...data.projects, newProject] };
-    setData(newData)
-    setCurrentProject(newProject)
 
+    // mise à jour locale
+    const newData = {
+      ...data,
+      projects: [...data.projects, newProject]
+    };
+
+    setData(newData);
+    setCurrentProject(newProject);
+
+    // envoi backend
     fetch("http://localhost:3000/projects", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify(newProject)
-    })
+    });
   };
 
+
+   // SUPPRIMER PROJET //
   const handleDeleteProject = (projectId: number) => {
 
     if (!data) return;
@@ -87,17 +159,43 @@ export default function App() {
     });
 
     if (currentProject?.id === projectId) {
-      setCurrentProject(
-        newProjects.find(p => p.userId === currentUser?.id) || null
-      );
+      newProjects.find(p =>
+        currentUser && p.userIds?.includes(currentUser.id)) || null;
     }
 
+    // appel backend
     fetch(`http://localhost:3000/projects/${projectId}`, {
       method: "DELETE"
     });
 
   };
 
+
+  // AJOUTER UTILISATEURS //
+  const handleAddUser = async (name: string) => {
+    if (!data) return;
+
+    // envoi backend
+    const res = await fetch("http://localhost:3000/users", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ name })
+    });
+
+    const newUser = await res.json();
+
+    // mise à jour locale
+    setData({
+      ...data,
+      users: [...data.users, newUser]
+    });
+    setCurrentUser(newUser);// devient utilisateur actif
+  };
+
+
+  // ECRAN DE CHARGEMENT //
   if (loading) return (
     <div className="loading-screen">
       <div className="loader-ring" />
@@ -105,8 +203,12 @@ export default function App() {
     </div>
   );
 
-  if (!data || !currentUser) return null;
+  
+  if (!data) return null;
 
+  // fallback utilisateur
+  const user = currentUser || data.users[0];
+  
   return (
       <div
         className={`app-layout ${
@@ -126,16 +228,35 @@ export default function App() {
         }
       >
 
-      <Sidebar
-        users={data.users}
-        projects={data.projects}
-        currentUser={currentUser}
-        currentProject={currentProject}
-        onSelectUser={handleSelectUser}
-        onSelectProject={setCurrentProject}
-        onAddProject={handleAddProject}
-        onDeleteProject={handleDeleteProject}
-      />
+      {/* SIDEBAR */}
+      <div
+        className={`sidebar-wrapper${sidebarCollapsed ? ' collapsed' : ''}`}
+        style={{ width: sidebarCollapsed ? 0 : sidebarWidth }}
+      >
+        <Sidebar
+          users={data.users}
+          projects={data.projects}
+          currentUser={currentUser || data.users[0]}
+          currentProject={currentProject}
+          onSelectUser={handleSelectUser}
+          onSelectProject={setCurrentProject}
+          onAddProject={handleAddProject}
+          onDeleteProject={handleDeleteProject}
+          onAddUser={handleAddUser}
+        />
+        <div className="sidebar-resize-handle" onMouseDown={handleResizeStart} />
+      </div>
+
+      <button
+        className="sidebar-toggle-btn"
+        style={{ left: sidebarCollapsed ? 0 : sidebarWidth }}
+        onClick={() => setSidebarCollapsed(c => !c)}
+        title={sidebarCollapsed ? 'Afficher le panneau' : 'Masquer le panneau'}
+      >
+        {sidebarCollapsed ? '›' : '‹'}
+      </button>
+
+      {/* MAIN */}
       <main className="main-content">
         {currentProject ? (
           <>
@@ -147,14 +268,19 @@ export default function App() {
                 </span>
               </div>
 
+              {/* HEADER */}
               <div className="board-header-right">
+
+                {/* utilisateur affiché */}
                 <div
                   className="board-user-badge"
-                  style={{ background: currentUser.color }}
+                  style={{ background: user.color }}
                 >
-                  {currentUser.avatar} {currentUser.name}
+                  {user.avatar} {user.name} {}
                 </div>
 
+
+                {/* bouton menu */}
                 <button
                   className="menu-button"
                   onClick={() => setMenuOpen(!menuOpen)}
@@ -163,6 +289,8 @@ export default function App() {
                 </button>
               </div>
             </header>
+
+            {/* MENU */}
             {menuOpen && (
               <BoardMenu
                 onClose={() => setMenuOpen(false)}
@@ -176,15 +304,24 @@ export default function App() {
 
                   handleUpdateProject(updated)
                 }}
+
+                currentUser={currentUser || data.users[0]}
+                project={currentProject}
+                users={data.users}
+                onUpdateProject={handleUpdateProject}
               />
             )}
+
+            {/* BOARD */}
             <Board project={currentProject} onUpdate={handleUpdateProject} />
           </>
         ) : (
+
+          // écran vide
           <div className="empty-state">
             <div className="empty-icon">📋</div>
             <h2>Aucun projet sélectionné</h2>
-            <p>Créez un nouveau projet depuis le panneau latéral</p>
+            <p>Créez un nouvel utilisateur si cela n’est pas déjà fait, ainsi qu’un projet depuis le panneau latéral</p>
           </div>
         )}
       </main>
