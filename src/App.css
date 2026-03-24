@@ -83,10 +83,19 @@ body::after {
   background-color:#0d0f14;
 }
 
+/* ─── SIDEBAR WRAPPER ────────────────────────────────────── */
+.sidebar-wrapper {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
 /* ─── SIDEBAR ────────────────────────────────────────────── */
 .sidebar {
-  width: 260px;
-  min-width: 260px;
+  width: 100%;
+  min-width: 180px;
   background: var(--bg-sidebar);
   backdrop-filter: blur(20px);
   border-right: 1px solid var(--border);
@@ -95,6 +104,72 @@ body::after {
   padding: 24px 16px;
   gap: 28px;
   overflow-y: auto;
+  overflow-x: hidden;
+  transition: opacity 0.2s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-wrapper.collapsed .sidebar {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-20px);
+}
+
+/* ─── RESIZE HANDLE ──────────────────────────────────────── */
+.sidebar-resize-handle {
+  position: absolute;
+  right: -4px;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  cursor: col-resize;
+  z-index: 100;
+}
+
+.sidebar-resize-handle::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 40px;
+  border-radius: 2px;
+  background: var(--border);
+  transition: background 0.2s, width 0.2s;
+}
+
+.sidebar-resize-handle:hover::after {
+  background: var(--accent);
+  width: 3px;
+}
+
+/* ─── TOGGLE BUTTON ──────────────────────────────────────── */
+.sidebar-toggle-btn {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 200;
+  width: 20px;
+  height: 48px;
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border);
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 14px;
+  transition: background 0.2s, color 0.2s, left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  padding: 0;
+}
+
+.sidebar-toggle-btn:hover {
+  background: rgba(108, 99, 255, 0.15);
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
 .sidebar-logo {
@@ -109,10 +184,10 @@ body::after {
   filter: drop-shadow(0 0 8px var(--accent));
 }
 .logo-text {
-  font-family: 'Syne', sans-serif;
-  font-size: 20px;
+  font-size: 30px;
   font-weight: 800;
   letter-spacing: -0.5px;
+  font-weight: bold;
   background: linear-gradient(135deg, #fff 30%, var(--accent));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -208,6 +283,11 @@ body::after {
 .btn-add-project:hover { background: rgba(108,99,255,0.1); }
 
 .add-project-form { display: flex; flex-direction: column; gap: 6px; }
+
+
+.add-user-btn {
+  margin-top: 10px;
+}
 
 /* ─── MAIN CONTENT ────────────────────────────────────────── */
 .main-content {

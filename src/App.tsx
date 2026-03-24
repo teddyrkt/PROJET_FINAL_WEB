@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AppData, Project, User } from '../types';
 import './App.css';
-import Board from './Board';
-import Sidebar from './Sidebar';
-import BoardMenu from './BoardMenu'
+import Board from './Components/Board';
+import Sidebar from './Components/Sidebar';
+import BoardMenu from './Components/BoardMenu'
 
 export default function App() {
   const [data, setData] = useState<AppData | null>(null);
@@ -11,6 +11,36 @@ export default function App() {
   const [currentProject, setCurrentProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // ── Sidebar resize / collapse ──
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(260);
+  const isResizing = useRef(false);
+  const startX = useRef(0);
+  const startWidth = useRef(0);
+
+  const handleResizeStart = (e: React.MouseEvent) => {
+    if (sidebarCollapsed) return;
+    isResizing.current = true;
+    startX.current = e.clientX;
+    startWidth.current = sidebarWidth;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    const onMove = (ev: MouseEvent) => {
+      if (!isResizing.current) return;
+      setSidebarWidth(Math.min(400, Math.max(180, startWidth.current + ev.clientX - startX.current)));
+    };
+    const onUp = () => {
+      isResizing.current = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  };
+  // ──────────────────────────────
 
   useEffect(() => {
     fetch("http://localhost:3000/data")
@@ -98,6 +128,26 @@ export default function App() {
 
   };
 
+
+  const handleAddUser = async (name: string) => {
+    if (!data) return;
+
+    const res = await fetch("http://localhost:3000/users", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ name })
+    });
+
+    const newUser = await res.json();
+
+    setData({
+      ...data,
+      users: [...data.users, newUser]
+    });
+  };
+
   if (loading) return (
     <div className="loading-screen">
       <div className="loader-ring" />
@@ -126,16 +176,32 @@ export default function App() {
         }
       >
 
-      <Sidebar
-        users={data.users}
-        projects={data.projects}
-        currentUser={currentUser}
-        currentProject={currentProject}
-        onSelectUser={handleSelectUser}
-        onSelectProject={setCurrentProject}
-        onAddProject={handleAddProject}
-        onDeleteProject={handleDeleteProject}
-      />
+      <div
+        className={`sidebar-wrapper${sidebarCollapsed ? ' collapsed' : ''}`}
+        style={{ width: sidebarCollapsed ? 0 : sidebarWidth }}
+      >
+        <Sidebar
+          users={data.users}
+          projects={data.projects}
+          currentUser={currentUser}
+          currentProject={currentProject}
+          onSelectUser={handleSelectUser}
+          onSelectProject={setCurrentProject}
+          onAddProject={handleAddProject}
+          onDeleteProject={handleDeleteProject}
+          onAddUser={handleAddUser}
+        />
+        <div className="sidebar-resize-handle" onMouseDown={handleResizeStart} />
+      </div>
+
+      <button
+        className="sidebar-toggle-btn"
+        style={{ left: sidebarCollapsed ? 0 : sidebarWidth }}
+        onClick={() => setSidebarCollapsed(c => !c)}
+        title={sidebarCollapsed ? 'Afficher le panneau' : 'Masquer le panneau'}
+      >
+        {sidebarCollapsed ? '›' : '‹'}
+      </button>
       <main className="main-content">
         {currentProject ? (
           <>

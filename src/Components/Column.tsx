@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Column, Ticket } from '../types';
+import { Column, Ticket } from '../../types';
 import TicketCard from './TicketCard';
 import ConfirmModal from "./ConfirmModal"
 

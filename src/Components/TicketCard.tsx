@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Ticket } from '../types';
+import { Ticket } from '../../types';
 import ConfirmModal from "./ConfirmModal"
 
 interface TicketCardProps {

@@ -11,6 +11,12 @@
       "name": "Bob",
       "avatar": "B",
       "color": "#FF6584"
+    },
+    {
+      "id": 1774298957510,
+      "name": "Teddy",
+      "avatar": "T",
+      "color": "#fdea77"
     }
   ],
   "projects": [
@@ -25,28 +31,16 @@
           "title": "À faire",
           "tickets": [
             {
-              "title": "gjvhbjk",
-              "description": "h jn",
-              "priority": "low",
-              "id": "t-1773410286425"
+              "title": "snckjs",
+              "description": "cs jkl",
+              "priority": "medium",
+              "id": "t-1774059116641"
             },
             {
               "title": "Redaction",
               "description": "Rédiger",
               "priority": "medium",
               "id": "t-1772925978023"
-            },
-            {
-              "title": "xcvk",
-              "description": "hvbkjnlk",
-              "priority": "medium",
-              "id": "t-1773410294402"
-            },
-            {
-              "id": "t-1",
-              "title": "Créer la maquette",
-              "description": "Faire les wireframes de l'app",
-              "priority": "high"
             }
           ]
         },
@@ -55,10 +49,16 @@
           "title": "En cours",
           "tickets": [
             {
-              "title": "snckjs",
-              "description": "cs jkl",
+              "title": "gjvhbjk",
+              "description": "h jn",
+              "priority": "low",
+              "id": "t-1773410286425"
+            },
+            {
+              "title": "xcvk",
+              "description": "hvbkjnlk",
               "priority": "medium",
-              "id": "t-1774059116641"
+              "id": "t-1773410294402"
             }
           ]
         },

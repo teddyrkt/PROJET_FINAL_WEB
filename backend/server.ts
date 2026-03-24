@@ -28,6 +28,30 @@ app.get("/data", (_req: Request, res: Response) => {
   res.json(data)
 })
 
+
+/* ADD USER*/
+app.post("/users", (req: Request, res: Response) => {
+  const data = readData()
+
+  if (!req.body.name) {
+    return res.status(400).json({ error: "Name is required" })
+  }
+
+  const newUser = {
+    id: Date.now(),
+    name: req.body.name,
+    avatar: req.body.name[0].toUpperCase(),
+    color: "#" + Math.floor(Math.random() * 16777215).toString(16)
+  }
+
+  data.users.push(newUser)
+
+  writeData(data)
+
+  res.json(newUser)
+})
+
+
 /* UPDATE PROJECT */
 
 app.put("/projects/:id", (req: Request, res: Response) => {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Project, Ticket } from '../types';
+import { Project, Ticket } from '../../types';
 import ColumnComponent from './Column';
 
 interface BoardProps {

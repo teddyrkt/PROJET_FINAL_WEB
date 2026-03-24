@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, Project } from '../types';
+import { User, Project } from '../../types';
 import ConfirmModal from "./ConfirmModal"
 
 interface SidebarProps {
@@ -11,6 +11,7 @@ interface SidebarProps {
   onSelectProject: (project: Project) => void;
   onAddProject: (name: string) => void;
   onDeleteProject: (projectId: number) => void;
+  onAddUser: (name: string) => void;
 }
 
 function AddProjectForm({ onAdd }: { onAdd: (name: string) => void }) {
@@ -46,9 +47,47 @@ function AddProjectForm({ onAdd }: { onAdd: (name: string) => void }) {
   );
 }
 
+function AddUserForm({ onAdd }: { onAdd: (name: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState('');
+
+  const handle = () => {
+    if (!name.trim()) return;
+    onAdd(name);
+    setName('');
+    setOpen(false);
+  };
+
+  if (!open) return (
+    <button
+      className="btn-add-project add-user-btn"
+      onClick={() => setOpen(true)}
+    >
+      + Nouvel utilisateur
+    </button>
+  );
+
+  return (
+    <div className="add-project-form">
+      <input
+        className="ticket-edit-input"
+        placeholder="Nom utilisateur"
+        value={name}
+        onChange={e => setName(e.target.value)}
+        autoFocus
+        onKeyDown={e => e.key === 'Enter' && handle()}
+      />
+      <div className="ticket-edit-actions">
+        <button className="btn-save" onClick={handle}>Créer</button>
+        <button className="btn-cancel" onClick={() => setOpen(false)}>✕</button>
+      </div>
+    </div>
+  );
+}
+
 export default function Sidebar({
   users, projects, currentUser, currentProject,
-  onSelectUser, onSelectProject, onAddProject, onDeleteProject
+  onSelectUser, onSelectProject, onAddProject, onDeleteProject, onAddUser
 }: SidebarProps) {
   const userProjects = projects.filter(p => p.userId === currentUser.id);
   const [confirmDeleteProject, setConfirmDeleteProject] = useState<number | null>(null)
@@ -57,7 +96,7 @@ export default function Sidebar({
     <aside className="sidebar">
       <div className="sidebar-logo">
         <span className="logo-icon">⬡</span>
-        <span className="logo-text">KanbanFlow</span>
+        <span className="logo-text">DriftWork</span>
       </div>
 
       <div className="sidebar-section">
@@ -75,6 +114,7 @@ export default function Sidebar({
             </button>
           ))}
         </div>
+        <AddUserForm onAdd={onAddUser} />
       </div>
 
       <div className="sidebar-section sidebar-projects">
