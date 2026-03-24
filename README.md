@@ -94,7 +94,7 @@ PROJET_FINAL_WEB/
 ---
 
 ## Structure du projects.json
-
+Exemple de structure du json
 ```json
 {
   "users": [
